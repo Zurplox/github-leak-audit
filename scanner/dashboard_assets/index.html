@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Local operations dashboard for the GitHub public secret scanner">
+  <title>GitHub public secret scanner | Operations</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to findings</a>
+  <header class="site-header">
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true">GS</div>
+      <div>
+        <p class="eyebrow">Local operations console</p>
+        <h1>GitHub public secret scanner</h1>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="loopback-badge">Loopback only</span>
+      <span id="scan-state" class="state-pill" data-state="idle">Idle</span>
+      <span id="last-updated" class="muted">Waiting for status</span>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-shell">
+    <section class="panel controls-panel" aria-labelledby="controls-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Run management</p>
+          <h2 id="controls-title">Scan controls</h2>
+        </div>
+        <p class="privacy-note">Masked only: this dashboard never displays complete credentials or asks for tokens.</p>
+      </div>
+      <form id="scan-form" class="control-grid">
+        <div class="field">
+          <label for="scan-mode">Scan mode</label>
+          <select id="scan-mode" name="mode">
+            <option value="search">Search queries</option>
+            <option value="broad">Broad activity</option>
+            <option value="hybrid" selected>Hybrid</option>
+            <option value="repo">Target repository</option>
+          </select>
+        </div>
+        <div id="repository-field" class="field is-hidden">
+          <label for="repository">Repository <span class="field-hint">OWNER/REPO</span></label>
+          <input id="repository" name="repository" type="text" autocomplete="off" placeholder="octo-org/example">
+        </div>
+        <label class="check-field" for="run-once">
+          <input id="run-once" name="once" type="checkbox" checked>
+          <span>Run once</span>
+        </label>
+        <div class="control-actions">
+          <button id="start-scan" class="button button-primary" type="submit">Start scan</button>
+          <button id="pause-scan" class="button button-secondary" type="button" disabled>Pause</button>
+          <button id="stop-scan" class="button button-danger" type="button" disabled>Stop</button>
+        </div>
+      </form>
+      <div id="control-message" class="inline-message" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="metric-grid" aria-label="Scan metrics">
+      <article class="metric-card"><span class="metric-label">Safe findings</span><strong id="metric-findings">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Queued items</span><strong id="metric-queued">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Completed items</span><strong id="metric-done">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Failed items</span><strong id="metric-failed">—</strong></article>
+      <article class="metric-card"><span class="metric-label">Requests</span><strong id="metric-requests">—</strong></article>
+    </section>
+
+    <section class="panel findings-panel" aria-labelledby="findings-title">
+      <div class="section-heading findings-heading">
+        <div>
+          <p class="eyebrow">Evidence register</p>
+          <h2 id="findings-title">Findings</h2>
+        </div>
+        <div class="filter-field">
+          <label for="provider-filter">Filter provider</label>
+          <select id="provider-filter">
+            <option value="">All providers</option>
+          </select>
+        </div>
+      </div>
+      <p class="table-note">Every source link is an immutable GitHub commit/file/line permalink. Previews are masked.</p>
+      <div class="table-scroll">
+        <table>
+          <caption class="visually-hidden">Detected API credentials with exact source locations</caption>
+          <thead>
+            <tr>
+              <th scope="col">Provider / API type</th>
+              <th scope="col">Confidence</th>
+              <th scope="col">Repository</th>
+              <th scope="col">Exact file path</th>
+              <th scope="col">Line</th>
+              <th scope="col">Commit</th>
+              <th scope="col">Masked preview</th>
+              <th scope="col">Status</th>
+              <th scope="col">Open source</th>
+            </tr>
+          </thead>
+          <tbody id="findings-body"></tbody>
+        </table>
+      </div>
+      <div id="findings-state" class="table-state" role="status" aria-live="polite">Loading findings…</div>
+      <nav class="pagination" aria-label="Findings pages">
+        <button id="previous-page" class="button button-secondary" type="button" disabled>Previous</button>
+        <span id="page-summary">Page 1</span>
+        <button id="next-page" class="button button-secondary" type="button" disabled>Next</button>
+      </nav>
+    </section>
+
+    <div class="secondary-grid">
+      <section class="panel summary-panel" aria-labelledby="provider-title">
+        <div class="section-heading"><div><p class="eyebrow">At a glance</p><h2 id="provider-title">Provider distribution</h2></div></div>
+        <div id="provider-summary" class="bar-list" role="list"><p class="muted">Loading summary…</p></div>
+      </section>
+      <section class="panel summary-panel" aria-labelledby="confidence-title">
+        <div class="section-heading"><div><p class="eyebrow">Signal quality</p><h2 id="confidence-title">Confidence distribution</h2></div></div>
+        <div id="confidence-summary" class="bar-list" role="list"><p class="muted">Loading summary…</p></div>
+      </section>
+      <section class="panel summary-panel" aria-labelledby="daily-title">
+        <div class="section-heading"><div><p class="eyebrow">Timeline</p><h2 id="daily-title">Daily findings</h2></div></div>
+        <div id="daily-summary" class="bar-list" role="list"><p class="muted">Loading summary…</p></div>
+      </section>
+    </div>
+
+    <section id="draft-panel" class="panel draft-panel is-hidden" aria-labelledby="draft-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">Safe disclosure handoff</p><h2 id="draft-title">Disclosure preview</h2></div>
+        <button id="close-draft" class="button button-secondary" type="button">Close preview</button>
+      </div>
+      <p id="draft-path" class="muted"></p>
+      <pre id="draft-content" class="draft-content" tabindex="0"></pre>
+      <a id="draft-source" class="source-link is-hidden" target="_blank" rel="noopener noreferrer">Open exact GitHub source</a>
+    </section>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

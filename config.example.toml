@@ -1,0 +1,33 @@
+mode = "hybrid"
+
+[search]
+queries = [
+  "filename:.env password",
+  "filename:.env API_KEY",
+  "filename:config.json token",
+  "filename:.yml secret",
+]
+max_results_per_query = 100
+languages = []
+
+[broad]
+continuous = true
+poll_interval_seconds = 300
+recent_activity_pages = 1
+backfill_days = 7
+max_repositories = 100
+max_commits_per_repository = 10
+max_concurrent_scans = 4
+
+[scan]
+max_file_size = 512000
+max_tree_entries = 10000
+include_history = true
+allowed_extensions = [".env", ".json", ".yaml", ".yml", ".toml", ".py", ".js", ".ts", ".go", ".tf", ".sh"]
+
+[detection]
+confidence_threshold = 60
+
+[reports]
+output_directory = "reports"
+state_database = "state/scanner.sqlite3"

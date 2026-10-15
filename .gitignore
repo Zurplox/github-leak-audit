@@ -1,0 +1,13 @@
+.venv/
+.superpowers/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+.scanner/
+reports/
+state/
+*.sqlite3
+*.db
+.env
+.env.*
+!.env.example
